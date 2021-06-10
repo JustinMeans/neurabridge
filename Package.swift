@@ -21,8 +21,8 @@ let package = Package(
         .target(
             name: "neurabridge",
             dependencies: []),
-        .testTarget(
-            name: "neurabridgeTests",
-            dependencies: ["neurabridge"]),
+//        .testTarget(
+//            name: "neurabridgeTest",
+//            dependencies: ["neurabridge"]),
     ]
 )
