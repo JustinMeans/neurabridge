@@ -24,7 +24,7 @@ public struct IEXSectorPerformance: Codable, Hashable {
 	public var type: String
 	public var name: String
 	public var performance: Double
-	public var lastUpdated: Int
+	public var lastUpdated: Date
 	
 	enum CodingKeys: String, CodingKey {
 		case type = "type"
@@ -33,7 +33,7 @@ public struct IEXSectorPerformance: Codable, Hashable {
 		case lastUpdated = "lastUpdated"
 	}
 	
-	public init(type: String, name: String, performance: Double, lastUpdated: Int) {
+	public init(type: String, name: String, performance: Double, lastUpdated: Date) {
 		self.type = type
 		self.name = name
 		self.performance = performance
