@@ -6,8 +6,13 @@
 //
 
 import Foundation
+import JWSNewsBridge
 
-public struct BriefItem: Codable {
+public struct BriefItem: Codable, Hashable {
+	public static func == (lhs: BriefItem, rhs: BriefItem) -> Bool {
+		return lhs.hashValue == rhs.hashValue
+	}
+	
 	public init(briefMode: BriefMode, speechItems: Speech.Items) {
 		self.briefMode = briefMode
 		self.speechItems = speechItems
@@ -24,7 +29,11 @@ public protocol Briefable {
 	var speechResponse: [String]? { get set }
 }
 
-public enum BriefMode: Codable {
+public enum BriefMode: Codable, Hashable {
+	public static func == (lhs: BriefMode, rhs: BriefMode) -> Bool {
+		return lhs.hashValue == rhs.hashValue
+	}
+	
 	enum CodingKeys: CodingKey {
 		case tickerComposite
 		case macroUpdate
@@ -43,7 +52,7 @@ public enum BriefMode: Codable {
 				let macroUpdate = try container.decode(MacroComposite.Global.self, forKey: .macroUpdate)
 				self = .macroUpdate(macroUpdate)
 			case .newsItem:
-				let newsItem = try container.decode(News.Global.self, forKey: .newsItem)
+				let newsItem = try container.decode(BriefableNews.self, forKey: .newsItem)
 				self = .newsItem(newsItem)
 			case .tickerComposite:
 				let tickerComposite = try container.decode(TickerComposite.Micro.self, forKey: .tickerComposite)
@@ -74,11 +83,26 @@ public enum BriefMode: Codable {
 	
 	case tickerComposite(_ tickerComposite: TickerComposite.Micro)
 	case macroUpdate(_ macroComposite: MacroComposite.Global)
-	case newsItem(_ item: News.Global)
+	case newsItem(_ item: BriefableNews)
 	case dialogue(_ item: BriefDialogue)
 }
 
-public struct BriefDialogue: Codable {
+public struct BriefDialogue: Codable, Briefable, Speakable, Hashable {
+	public var speechVariations: [Speech.Items] {
+		[
+			[
+				Speech.Item.conversational(headline),
+				Speech.Item.conversational(content)
+			]
+		]
+	}
+	
+	public var briefItem: BriefItem {
+		BriefItem(briefMode: .dialogue(self), speechItems: speechVariations.randomElement()!)
+	}
+	
+	public var speechResponse: [String]?
+	
 	public init(headline: String, content: String) {
 		self.headline = headline
 		self.content = content

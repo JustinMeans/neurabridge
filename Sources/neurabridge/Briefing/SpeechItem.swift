@@ -24,7 +24,7 @@ public struct Speech {
 	
 	public typealias Items = [Item]
 	
-	public enum Item: Codable {
+	public enum Item: Codable, Hashable {
 		enum CodingKeys: CodingKey {
 			case news
 			case conversational
