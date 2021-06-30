@@ -30,6 +30,19 @@ public protocol Briefable {
 }
 
 public enum BriefMode: Codable, Hashable {
+	public var speechResponse: [String]? {
+		switch self {
+			
+			case .tickerComposite(let item):
+				return item.speechResponse
+			case .macroUpdate(let item):
+				return item.speechResponse
+			case .newsItem(let item):
+				return item.speechResponse
+			case .dialogue(let item):
+				return item.speechResponse
+		}
+	}
 	public static func == (lhs: BriefMode, rhs: BriefMode) -> Bool {
 		return lhs.hashValue == rhs.hashValue
 	}
