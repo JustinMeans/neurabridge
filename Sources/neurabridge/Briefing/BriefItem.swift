@@ -46,6 +46,18 @@ public enum BriefMode: Codable, Hashable {
 	public static func == (lhs: BriefMode, rhs: BriefMode) -> Bool {
 		return lhs.hashValue == rhs.hashValue
 	}
+	public var headline: String {
+		switch self {
+			case .dialogue(let item):
+				return item.headline
+			case .macroUpdate(_):
+				return "Market Update"
+			case .newsItem(let item):
+				return item.news.headline
+			case .tickerComposite(let item):
+				return item.company?.companyName ?? "Asset Update"
+		}
+	}
 	
 	enum CodingKeys: CodingKey {
 		case tickerComposite

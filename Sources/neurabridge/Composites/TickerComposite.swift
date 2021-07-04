@@ -13,19 +13,26 @@ public struct TickerComposite: Codable {
 		public var speechResponse: [String]?
 		
 		public var speechVariations: [Speech.Items] {
-			[
+			var intro: Speech.Item {
+				Speech.Item.conversational("""
+					\((company?.companyName).unwrapped) is \(((quote?.changePercent).unwrapped * 100) < 0 ? "down" : "up") \(((quote?.changePercent).unwrapped * 100).dollar)% for the day, trading at \((quote?.latestPrice).unwrapped.dollar) dollars.
+					Here are the latest headlines!
+					""")
+			}
+			var filteredNews: [IEXNews] {
+				let dateThreshold = Date(timeIntervalSinceNow: -4 * 60 * 60 * 24)
+				return news?.filter({ $0.lang == "en" && $0.datetime > dateThreshold }) ?? []
+			}
+			return [
 				[
-					Speech.Item.conversational("""
-					\((company?.companyName).unwrapped) is \(((quote?.changePercent).unwrapped * 100) < 0 ? "down" : "up") \(((quote?.changePercent).unwrapped * 100))% for the day, trading at \((quote?.latestPrice).unwrapped.dollar) dollars.
-					Here are the latest headlines.
-					"""),
+					intro,
 					Speech.Item.news("""
-						\(news?.first.map({ item in
+						\(filteredNews.first.map({ item in
 							"\(item.source) says: \(item.headline). \(item.summary)"
 						}) ?? "")
-						\(news?.prefix(3).map({ item in
+						\(filteredNews.prefix(2).map({ item in
 							"\(item.headline), according to \(item.source)"
-						}).joined(separator: ". ") ?? "")
+						}).joined(separator: ". "))
 						""")
 				],
 			]
@@ -108,23 +115,23 @@ extension Optional where Wrapped == String {
 }
 
 public extension Optional where Wrapped == Double {
-	public var format: String {
+	var format: String {
 		return self?.format ?? ""
 	}
 	
-	public var unwrapped: Double {
+	var unwrapped: Double {
 		return self ?? 0
 	}
 }
 
 public extension Decimal {
-	public var double: Double {
+	var double: Double {
 		return NSDecimalNumber(decimal:self).doubleValue
 	}
 }
 
 public extension Double {
-	public var shortenedDescription: String {
+	var shortenedDescription: String {
 		let thousandNum = self/1000
 		let millionNum = self/1000000
 		let billionNum = self/1000000000
@@ -170,12 +177,12 @@ public extension Double {
 }
 
 public extension Double {
-	public var format: String {
+	var format: String {
 		return Decimal(self).description
 		//		String(format: "%.2f", self)
 	}
 	
-	public var dollar: String {
+	var dollar: String {
 		return String(format: "%.2f", self)
 	}
 	
