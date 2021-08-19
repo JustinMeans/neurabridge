@@ -12,7 +12,7 @@ let package = Package(
             targets: ["neurabridge"]),
     ],
     dependencies: [
-		.package(url: "https://github.com/JustinMeans/JWSNewsBridge", from: "1.0.1"),
+		.package(url: "https://github.com/JustinMeans/JWSNewsBridge", from: "1.0.2"),
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
     ],

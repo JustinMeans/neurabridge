@@ -21,7 +21,8 @@ import Foundation
 import Foundation
 
 // MARK: - IEXQuote
-public struct IEXQuote: Codable, Hashable {
+public struct IEXQuote: Codable, Hashable, Identifiable {
+	public var id = UUID()
 	public var symbol: String?
 	public var companyName: String?
 	public var primaryExchange: String?

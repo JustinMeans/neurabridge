@@ -18,12 +18,12 @@ public struct MacroComposite {
 		public var speechVariations: [Speech.Items] {
 			[
 			[
-				Speech.Item.conversational("""
-					Total markets are performing at \((sectorMacroPerformance.unwrapped * 100).dollar)% today.
-					"""),
+//				Speech.Item.conversational("""
+//					Today's best performing sector is \(sectorPerformances?.sorted(by: { $0.performance < $1.performance }).first?.name)
+//					"""),
 				Speech.Item.news("""
-					The hottest stock today is \((gainers?.first?.companyName).unwrapped) trading up \(((gainers?.first?.changePercent).unwrapped * 100).dollar) %, followed by \(gainers?.prefix(3).dropFirst().map({ $0.companyName.unwrapped }).joined(separator: ", and") ?? "")
-					Today's losers include: \((losers?.first?.companyName).unwrapped) trading down \(((losers?.first?.changePercent).unwrapped * 100).dollar) %, followed by \(losers?.prefix(3).dropFirst().map({ $0.companyName.unwrapped }).joined(separator: ", and") ?? "")
+					The hottest stock today is \((gainers?.first?.companyName).unwrapped) trading up \(((gainers?.first?.changePercent).unwrapped * 100).dollar) %, followed by \(gainers?.prefix(2).dropFirst().map({ $0.companyName.unwrapped }).joined(separator: ", and") ?? "")
+					Today's losers include: \((losers?.first?.companyName).unwrapped) trading down \(((losers?.first?.changePercent).unwrapped * 100).dollar) %, followed by \(losers?.prefix(2).dropFirst().map({ $0.companyName.unwrapped }).joined(separator: ", and") ?? "")
 					""")
 			]
 			]
@@ -48,6 +48,7 @@ public struct MacroComposite {
 		public var marketVolumes: IEXMarketVolumes?
 		public var gdps: IEXGDPs?
 		public var cpis: IEXCPIs?
+//		public var
 		
 		public var sectorMacroPerformance: Double? {
 			sectorPerformances?.reduce(0, { count, sector in

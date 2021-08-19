@@ -20,6 +20,40 @@ public struct BriefItem: Codable, Hashable {
 	
 	public var briefMode: BriefMode
 	public var speechItems: Speech.Items
+	
+	public var title: String {
+		switch briefMode {
+			case .dialogue(let item):
+				return item.headline
+			case .macroUpdate(let item):
+				return "Markets Update"
+			case .newsItem(let item):
+				return item.news.headline
+			case .tickerComposite(let item):
+				return item.company?.companyName ?? "Neurafund Ticker Update"
+		}
+	}
+	
+	public var subtitle: String? {
+		switch briefMode {
+			case .newsItem(let item):
+				return item.news.source
+			case .tickerComposite(let item):
+				return item.company?.symbol ?? ""
+			@unknown default: return nil
+		}
+	}
+	
+	public var imageURL: URL? {
+		switch briefMode {
+			case .newsItem(let item):
+				guard let string = item.news.imageURL else { return nil }
+				return URL(string: string)
+			case .tickerComposite(let item):
+				return URL(string: "https://storage.googleapis.com/iex/api/logos/\((item.quote?.symbol).unwrapped).png")
+			@unknown default: return nil
+		}
+	}
 }
 
 public typealias Brief = [BriefItem]

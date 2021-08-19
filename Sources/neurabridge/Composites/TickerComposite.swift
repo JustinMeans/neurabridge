@@ -13,29 +13,121 @@ public struct TickerComposite: Codable {
 		public var speechResponse: [String]?
 		
 		public var speechVariations: [Speech.Items] {
-			var intro: Speech.Item {
-				Speech.Item.conversational("""
-					\((company?.companyName).unwrapped) is \(((quote?.changePercent).unwrapped * 100) < 0 ? "down" : "up") \(((quote?.changePercent).unwrapped * 100).dollar)% for the day, trading at \((quote?.latestPrice).unwrapped.dollar) dollars.
-					Here are the latest headlines!
-					""")
+			var companyName: String {
+				(company?.companyName).unwrapped.replacingOccurrences(of: "Incorporated", with: "").replacingOccurrences(of: "Inc.", with: "").replacingOccurrences(of: "Inc", with: "").replacingOccurrences(of: "Corp", with: "").replacingOccurrences(of: "Class A", with: "")
+			}
+			var introVariations: [Speech.Item] {
+				var suffixVariations: [String] {
+					[
+						"for the day,",
+						"Today,",
+						"On the daily,",
+						",",
+					]
+				}
+				var pricePrefixVarations: [String] {
+					[
+					"It's current price is",
+						"It stands at",
+						"trading at",
+						"Priced at",
+						"It's current price is",
+						"It trades at",
+						"With a single share costing",
+						"Going for a share price of",
+						"With a share price of",
+					]
+				}
+				return [
+					Speech.Item.conversational("""
+					\(companyName) is \(((quote?.changePercent).unwrapped * 100) < 0 ? "down" : "up") \(String(format: "%.1f", ((quote?.changePercent).unwrapped * 100)))% \(suffixVariations.randomElement()!) \(pricePrefixVarations.randomElement()!) $\(String(format: "%.2f", ((quote?.latestPrice).unwrapped))).
+					"""),
+				]
 			}
 			var filteredNews: [IEXNews] {
+				func filter(_ newsItem: IEXNews) -> Bool {
+					var good: Bool = true
+					for item in TickerComposite.newsBlacklist {
+						if newsItem.source.lowercased().contains(item.lowercased()) {
+							good = false
+							break
+						}
+					}
+					return good
+					if newsItem.headline.contains("?") {
+						good = false
+					}
+				}
 				let dateThreshold = Date(timeIntervalSinceNow: -4 * 60 * 60 * 24)
-				return news?.filter({ $0.lang == "en" && $0.datetime > dateThreshold }) ?? []
+				return news?.filter({ filter($0) && $0.lang == "en" && $0.datetime > dateThreshold }) ?? []
 			}
-			return [
-				[
-					intro,
+			var bridgeVariations: [Speech.Item] {
+				if filteredNews.isEmpty {
+					return []
+				} else {
+					return [
+						Speech.Item.conversational("Here are the latest headlines."),
+						Speech.Item.conversational("Here's the latest."),
+						Speech.Item.conversational("Here's what's going on."),
+						Speech.Item.conversational("Here's what's making headlines."),
+						Speech.Item.conversational("Here's what's in the news."),
+						Speech.Item.conversational("Here's what's happening."),
+						Speech.Item.conversational("Here's the news."),
+						Speech.Item.conversational("This is the latest."),
+						Speech.Item.conversational("This is what's going on."),
+						Speech.Item.conversational("This is what's making headlines."),
+						Speech.Item.conversational("This is what's in the news."),
+						Speech.Item.conversational("This is what's happening."),
+						Speech.Item.conversational("I'll share the latest."),
+						Speech.Item.conversational("I'll share what's going on."),
+						Speech.Item.conversational("I'll share what's making headlines."),
+						Speech.Item.conversational("I'll share what's in the news."),
+						Speech.Item.conversational("I'll share what's happening."),
+						Speech.Item.conversational("Let's see the latest."),
+						Speech.Item.conversational("Let's see what's going on."),
+						Speech.Item.conversational("Let's see what's making headlines."),
+						Speech.Item.conversational("Let's see what's in the news."),
+						Speech.Item.conversational("Let's see what's happening."),
+						Speech.Item.conversational("")
+					]
+				}
+			}
+			var newsVariations: [Speech.Item] {
+				let selection = filteredNews.prefix(3)
+				return [
 					Speech.Item.news("""
-						\(filteredNews.first.map({ item in
-							"\(item.source) says: \(item.headline). \(item.summary)"
+						\(selection.first.map({ item in
+							"\(item.source) says: \(item.headline)."
 						}) ?? "")
-						\(filteredNews.prefix(2).map({ item in
+						\(selection.suffix(2).map({ item in
 							"\(item.headline), according to \(item.source)"
 						}).joined(separator: ". "))
+						"""),
+					Speech.Item.news("""
+						\(selection.first.map({ item in
+							"From \(item.source): \(item.headline)."
+						}) ?? "")
+						\(selection.suffix(2).map({ item in
+							"\(item.source) says: \(item.headline)."
+						}).joined(separator: ". "))
 						""")
-				],
-			]
+				]
+			}
+			if filteredNews.isEmpty {
+				return [
+					[
+						introVariations.randomElement()!,
+					]
+				]
+			} else {
+				return [
+					[
+						introVariations.randomElement()!,
+						bridgeVariations.randomElement()!,
+						newsVariations.randomElement()!
+					]
+				]
+			}
 		}
 		
 		public var briefItem: BriefItem {
@@ -61,6 +153,38 @@ public struct TickerComposite: Codable {
 		public var stats: IEXStats?
 		public var users: [User.Micro]?
 		public var favorite: Bool?
+		
+		var filteredNews: [IEXNews] {
+			func filter(_ newsItem: IEXNews) -> Bool {
+				var good: Bool = true
+				for item in TickerComposite.newsBlacklist {
+					if newsItem.source.lowercased().contains(item.lowercased()) {
+						good = false
+						break
+					}
+				}
+				return good
+				if newsItem.headline.contains("?") {
+					good = false
+				}
+			}
+			let dateThreshold = Date(timeIntervalSinceNow: -4 * 60 * 60 * 24)
+			return news?.filter({ filter($0) && $0.lang == "en" && $0.datetime > dateThreshold }) ?? []
+		}
+	}
+	
+	static var newsBlacklist: [String] {
+		[
+			"Business Insider",
+			"GuruFocus",
+			"Benzinga",
+			"CityNews",
+			"Manila",
+			"Lagos",
+			"Jumbo News",
+			"Nigeria",
+			"IPN News Agency"
+		]
 	}
 	
 //	public struct Global: Codable, Hashable {

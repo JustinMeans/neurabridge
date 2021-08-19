@@ -29,7 +29,7 @@ public struct IEXNews: Codable, Hashable {
 	public var related: String
 	public var image: String?
 	public var lang: String
-	public var hasPaywall: Bool
+//	public var hasPaywall: String?
 	
 	enum CodingKeys: String, CodingKey {
 		case datetime = "datetime"
@@ -40,10 +40,10 @@ public struct IEXNews: Codable, Hashable {
 		case related = "related"
 		case image = "image"
 		case lang = "lang"
-		case hasPaywall = "hasPaywall"
+//		case hasPaywall = "hasPaywall"
 	}
 	
-	public init(datetime: Date, headline: String, source: String, url: String, summary: String, related: String, image: String?, lang: String, hasPaywall: Bool) {
+	public init(datetime: Date, headline: String, source: String, url: String, summary: String, related: String, image: String?, lang: String) {
 		self.datetime = datetime
 		self.headline = headline
 		self.source = source
@@ -52,7 +52,7 @@ public struct IEXNews: Codable, Hashable {
 		self.related = related
 		self.image = image
 		self.lang = lang
-		self.hasPaywall = hasPaywall
+//		self.hasPaywall = hasPaywall
 	}
 }
 

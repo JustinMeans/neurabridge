@@ -17,9 +17,9 @@ public struct Speech {
 		public var voice: String
 		public var items: [Speech.Item]
 		
-		public var ssml: String {
-			return "<speak>\(items.map({ $0.ssml }).joined(separator: " "))</speak>"
-		}
+//		public var ssml: String {
+//			return "<speak>\(items.map({ $0.ssml }).joined(separator: " "))</speak>"
+//		}
 	}
 	
 	public typealias Items = [Item]
@@ -68,17 +68,36 @@ public struct Speech {
 		}
 		
 		public var ssml: String {
-			switch self {
-				
-				case .news(let text):
-					return "<amazon:domain name='news'>\(text.ssmlFormatted)</amazon:domain>"
-				case .conversational(let text):
-					return "<amazon:domain name ='conversational'>\(text.ssmlFormatted)</amazon:domain>"
-				case .pause(let durationMS):
-					return "<break time='\(durationMS)ms'/>"
-				case .standard(let text):
-					return "\(text.ssmlFormatted)"
+			var text: String {
+				switch self {
+					
+					case .news(let text):
+						return "<amazon:domain name='news'>\(text.ssmlFormatted)</amazon:domain>"
+					case .conversational(let text):
+						return "<amazon:domain name ='conversational'>\(text.ssmlFormatted)</amazon:domain>"
+					case .pause(let durationMS):
+						return "<break time='\(durationMS)ms'/>"
+					case .standard(let text):
+						return "\(text.ssmlFormatted)"
+				}
 			}
+			var ret = "<speak>\(text)</speak>"
+			return ret
+		}
+		public var id: String {
+			var text: String {
+				switch self {
+					case .news(let text):
+						return text
+					case .conversational(let text):
+						return text
+					case .pause(durationMS: let durationMS):
+						return ssml
+					case .standard(let text):
+						return text
+				}
+			}
+			return String(text.toBase64().prefix(254))
 		}
 		case news(_ text: String)
 		case conversational(_ text: String)
@@ -107,3 +126,39 @@ public extension String {
 		return ssml
 	}
 }
+
+extension String {
+	
+	/// Returns the base 64 encoded representation
+	fileprivate func base64Encoded() -> String {
+		return (data(using: .utf8)?.base64EncodedString())!
+	}
+	
+	
+	/// Returns the base 64 representation
+	fileprivate func toBase64() -> String {
+		return Data(self.utf8).base64EncodedString()
+	}
+	
+	
+	/// Returns the base 64 decoded representation
+	fileprivate func base64Decoded() -> String {
+		let data = Data(base64Encoded: self.toBase64())!
+		return String(data: data, encoding: .utf8)!
+	}
+	
+//
+//	/// Crypto method to hmac the input string.
+//	/// - Parameters:
+//	///   - algorithm: The specified algorithm for conversion.
+//	///   - key: The key input that typically would be generated or used before calling this method.
+//	/// - Returns: The string hmac representation of the input string.
+//	public func hmac(algorithm: HmacAlgorithm, key: String) -> String {
+//		var digest = [UInt8](repeating: 0, count: algorithm.digestLength)
+//		CCHmac(algorithm.algorithm, key, key.count, self, self.count, &digest)
+//		let data = Data(bytes: digest)
+//		return data.map { String(format: "%02hhx", $0) }.joined()
+//	}
+	
+}
+
