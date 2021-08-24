@@ -24,12 +24,12 @@ public struct User {
 	}
 	
 	public struct Micro: Codable, Hashable, Identifiable {
-		public let id: UUID
-		public let username: String
-		public let profilePicURL: String?
-		public let firstName: String?
-		public let lastName: String?
-		public let websiteURL: String?
+		public var id: UUID
+		public var username: String
+		public var profilePicURL: String?
+		public var firstName: String?
+		public var lastName: String?
+		public var websiteURL: String?
 		
 		public init(id: UUID, username: String, profilePicURL: String?, firstName: String?, lastName: String?, websiteURL: String?) {
 			self.id = id
@@ -54,6 +54,9 @@ public struct User {
 		public var email: String?
 		public var token: String?
 		public var global: Global?
+		public var micro: Micro? {
+			global?.micro
+		}
 	}
 	
 	public struct CreateData: Codable {
