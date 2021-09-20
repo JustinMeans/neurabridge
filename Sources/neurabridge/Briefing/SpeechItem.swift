@@ -104,6 +104,14 @@ public struct Speech {
 		case pause(durationMS: Int)
 		case standard(_ text: String)
 	}
+//	
+//	public enum Voice {
+//		case americanFemale
+//		case americanMale
+//		case spanishMale
+//		case britishFemale
+//		case
+//	}
 }
 
 public protocol Speakable {

@@ -22,7 +22,10 @@ import Foundation
 
 // MARK: - IEXQuote
 public struct IEXQuote: Codable, Hashable, Identifiable {
-	public var id = UUID()
+//	public var id = UUID()
+	public var id: String? {
+		return symbol
+	}
 	public var symbol: String?
 	public var companyName: String?
 	public var primaryExchange: String?
